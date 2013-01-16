@@ -1,19 +1,13 @@
 /**
-*   Copyright 2010-2011 Petr Hamernik
-*
-*   Licensed under the Apache License, Version 2.0 (the "License");
-*   you may not use this file except in compliance with the License.
-*   You may obtain a copy of the License at
-*
-*       http://www.apache.org/licenses/LICENSE-2.0
-*
-*   Unless required by applicable law or agreed to in writing, software
-*   distributed under the License is distributed on an "AS IS" BASIS,
-*   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*   See the License for the specific language governing permissions and
-*   limitations under the License.
-*/
-
+ * Copyright 2010-2011 Petr Hamernik
+ * 
+* Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+ * 
+* http://www.apache.org/licenses/LICENSE-2.0
+ * 
+* Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+ */
 package org.i18nchecker.impl;
 
 import java.io.File;
@@ -42,8 +36,8 @@ class JavaSourceModel {
 
     private static final String FONT = "Font";
     private static final List<String> KNONW_FONTS = Arrays.asList(new String [] {
-        "Tahoma", "Courier", "Arial", "Dialog"
-    });
+                "Tahoma", "Courier", "Arial", "Dialog"
+            });
 
     private String fileName;
     private List<Info> strings;
@@ -64,9 +58,10 @@ class JavaSourceModel {
             List<?> list = tokens.getTokens();
             int lineOfLastNbBundleOccurence = -1;
             int lineOfLastAnnotationOccurence = -1;
+            int annotationLevel = -1;
             int lineOfLastAssert = -1;
             int lineOfLastFont = -1;
-            for (Object obj: list) {
+            for (Object obj : list) {
                 Token token = (Token) obj;
                 int line = token.getLine();
                 if (token.getType() == JavaLexer.StringLiteral) {
@@ -76,9 +71,15 @@ class JavaSourceModel {
                         // skip short strings
                         continue;
                     }
-                    if (line == lineOfLastAnnotationOccurence) {
-                        // skip annotations
-                        continue;
+                    if (line == lineOfLastAnnotationOccurence || annotationLevel != -1) {
+                        if (str.startsWith("#") && str.length() > 1) {
+                            str = str.substring(1);
+                            strings.add(new Info(str, line, true));
+                            continue;
+                        } else {
+                            // skip annotations
+                            continue;
+                        }
                     }
                     if (line == lineOfLastAssert) {
                         // skip asserts
@@ -112,6 +113,16 @@ class JavaSourceModel {
                     lineOfLastAnnotationOccurence = line;
                 } else if (token.getType() == JavaLexer.ASSERT) {
                     lineOfLastAssert = line;
+                } else if (token.getType() == JavaLexer.T__66) { // (
+                    if (line == lineOfLastAnnotationOccurence) {
+                        annotationLevel++;
+                    } else if (annotationLevel != -1) {
+                        annotationLevel++;
+                    }
+                } else if (token.getType() == JavaLexer.T__67) { // )
+                    if (annotationLevel != -1) {
+                        annotationLevel--;
+                    }
                 }
             }
         } finally {
@@ -145,7 +156,7 @@ class JavaSourceModel {
                 }
             }
         }
-        
+
         // If string there is only string in the line in java source which exists in resource bundle and is marked with NOI18N then this comment is redundant
         // Ignore java sources which are forms.
         File form = new File(fileName.substring(0, fileName.length() - 5) + ".form");
