@@ -1,19 +1,18 @@
 /**
-*   Copyright 2010-2011 Petr Hamernik
-*
-*   Licensed under the Apache License, Version 2.0 (the "License");
-*   you may not use this file except in compliance with the License.
-*   You may obtain a copy of the License at
-*
-*       http://www.apache.org/licenses/LICENSE-2.0
-*
-*   Unless required by applicable law or agreed to in writing, software
-*   distributed under the License is distributed on an "AS IS" BASIS,
-*   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*   See the License for the specific language governing permissions and
-*   limitations under the License.
-*/
-
+ * Copyright 2010-2011 Petr Hamernik
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.i18nchecker.impl;
 
 import java.io.File;
@@ -26,22 +25,23 @@ import java.util.TreeMap;
 
 /**
  *
- * @author Petr Hamernik
+ * @author Petr Hamernik, Michał Cholewczyński
  */
 class PackageScanner {
-    private File packageDir;
+
+    private final File packageDir;
 
     /** One primary resource bundle per package. */
     private PrimaryResourceBundleModel primaryBundle;
 
     /** Translations */
-    private Set<TranslatedResourceBundleModel> translatedBundles;
+    private final Set<TranslatedResourceBundleModel> translatedBundles;
 
     /** Java sources in this package */
-    private Map<String, JavaSourceModel> sources;
+    private final Map<String, JavaSourceModel> sources;
 
     /** Simple package name e.g. "com/im/df/api" */
-    private String simpleName;
+    private final String simpleName;
 
     public PackageScanner(File packageDir, String moduleDirName) throws IOException {
         this.packageDir = packageDir;
@@ -60,7 +60,7 @@ class PackageScanner {
         switch (type) {
             case PRIMARY_BUNDLE:
                 if (primaryBundle != null) {
-                    throw new IllegalStateException("Not implemented yet: more resource bundles in one package: "+packageDir);
+                    throw new IllegalStateException("Not implemented yet: more resource bundles in one package: " + packageDir);
                 }
                 primaryBundle = new PrimaryResourceBundleModel(packageDir + File.separator + name);
                 break;
@@ -81,10 +81,10 @@ class PackageScanner {
         if (primaryBundle != null) {
             primaryBundle.parse();
         }
-        for (TranslatedResourceBundleModel translated: translatedBundles) {
+        for (TranslatedResourceBundleModel translated : translatedBundles) {
             translated.parse();
         }
-        for (JavaSourceModel source: sources.values()) {
+        for (JavaSourceModel source : sources.values()) {
             source.parse();
         }
     }
@@ -92,7 +92,7 @@ class PackageScanner {
     /** Verify whole package.
      */
     public void verify() {
-        for (JavaSourceModel source: sources.values()) {
+        for (JavaSourceModel source : sources.values()) {
             source.verify(primaryBundle);
         }
     }
@@ -116,13 +116,13 @@ class PackageScanner {
 
     /** Report results of verification */
     public void reportResults(ScanResults results) {
-        for (JavaSourceModel source: sources.values()) {
+        for (JavaSourceModel source : sources.values()) {
             source.reportResults(results);
         }
         if (primaryBundle != null) {
             primaryBundle.reportResults(results);
         }
-        for (TranslatedResourceBundleModel trb: translatedBundles) {
+        for (TranslatedResourceBundleModel trb : translatedBundles) {
             trb.reportResults(results);
         }
     }
@@ -130,7 +130,8 @@ class PackageScanner {
     public void bundle2csv(String languageCode, List<String> exportTo, String moduleName) throws IOException {
         if (primaryBundle != null) {
             TranslatedResourceBundleModel translated = findLanguage(languageCode);
-            primaryBundle.findStringsForTranslationTo(translated, moduleName, simpleName, exportTo);
+            TranslatedResourceBundleModel polish = findLanguage("pl");
+            primaryBundle.findStringsForTranslationTo(translated, polish, moduleName, simpleName, exportTo);
         }
     }
 
@@ -144,7 +145,7 @@ class PackageScanner {
     }
 
     private TranslatedResourceBundleModel findLanguage(String language) {
-        for (TranslatedResourceBundleModel trb: translatedBundles) {
+        for (TranslatedResourceBundleModel trb : translatedBundles) {
             if (language.equals(trb.getLanguage())) {
                 return trb;
             }

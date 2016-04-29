@@ -1,19 +1,18 @@
 /**
-*   Copyright 2010-2011 Petr Hamernik
-*
-*   Licensed under the Apache License, Version 2.0 (the "License");
-*   you may not use this file except in compliance with the License.
-*   You may obtain a copy of the License at
-*
-*       http://www.apache.org/licenses/LICENSE-2.0
-*
-*   Unless required by applicable law or agreed to in writing, software
-*   distributed under the License is distributed on an "AS IS" BASIS,
-*   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*   See the License for the specific language governing permissions and
-*   limitations under the License.
-*/
-
+ * Copyright 2010-2011 Petr Hamernik
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.i18nchecker.impl;
 
 import java.util.List;
@@ -22,29 +21,30 @@ import java.util.Map;
 /**
  * Represents one resource bundle of primary language (English) strings for one package.
  *
- * @author Petr Hamernik
+ * @author Petr Hamernik, Michał Cholewczyński
  */
 class PrimaryResourceBundleModel extends AbstractResourceBundleModel<PrimaryRBInfo> {
+
     /** These keys are mandatory. All modules should have them */
-    private static final String[] MODULE_BUNDLE_MANDATORY_KEYS = { "OpenIDE-Module-Display-Category", "OpenIDE-Module-Name" };
+    private static final String[] MODULE_BUNDLE_MANDATORY_KEYS = {"OpenIDE-Module-Display-Category", "OpenIDE-Module-Name"};
     /** These keys are optional, so it's not reported as warning if they are not present */
-    private static final String[] MODULE_BUNDLE_OPTIONAL_KEYS = { "OpenIDE-Module-Long-Description", "OpenIDE-Module-Short-Description" };
+    private static final String[] MODULE_BUNDLE_OPTIONAL_KEYS = {"OpenIDE-Module-Long-Description", "OpenIDE-Module-Short-Description"};
 
     public PrimaryResourceBundleModel(String fileName) {
         super(fileName);
     }
 
-    /** Verify Module's own Bundle.properties as some module specific keys are not used in sources  */
+    /** Verify Module's own Bundle.properties as some module specific keys are not used in sources */
     void verifyNBModuleBundle(ScanResults results) {
-        for (String key: MODULE_BUNDLE_MANDATORY_KEYS) {
+        for (String key : MODULE_BUNDLE_MANDATORY_KEYS) {
             PrimaryRBInfo info = keys.get(key);
             if (info != null) {
                 info.markAsUsed();
             } else {
-                results.add(ScanResults.Type.MODULE_MANIFEST_BUNDLE, getFileName(), 1, "Missing "+key+" NetBeans module bundle");
+                results.add(ScanResults.Type.MODULE_MANIFEST_BUNDLE, getFileName(), 1, "Missing " + key + " NetBeans module bundle");
             }
         }
-        for (String key: MODULE_BUNDLE_OPTIONAL_KEYS) {
+        for (String key : MODULE_BUNDLE_OPTIONAL_KEYS) {
             PrimaryRBInfo info = keys.get(key);
             if (info != null) {
                 info.markAsUsed();
@@ -55,7 +55,7 @@ class PrimaryResourceBundleModel extends AbstractResourceBundleModel<PrimaryRBIn
     /** Report results into the provided ScanResults */
     void reportResults(ScanResults results) {
         results.incrementFileCounter(FileType.PRIMARY_BUNDLE);
-        for (Map.Entry<String,PrimaryRBInfo> entry: keys.entrySet()) {
+        for (Map.Entry<String, PrimaryRBInfo> entry : keys.entrySet()) {
             String key = entry.getKey();
             PrimaryRBInfo info = entry.getValue();
             if ((info.getUsedCount() == 0) && (!info.isYesI18N())) {
@@ -92,18 +92,27 @@ class PrimaryResourceBundleModel extends AbstractResourceBundleModel<PrimaryRBIn
      * @param pack package name
      * @param exportTo export strings into this list
      */
-    void findStringsForTranslationTo(TranslatedResourceBundleModel translated, String module, String pack, List<String> exportTo) {
-        assert TranslatedCSVColumns.values().length == 5;
+    void findStringsForTranslationTo(TranslatedResourceBundleModel translated, TranslatedResourceBundleModel polish, String module, String pack, List<String> exportTo) {
+        assert TranslatedCSVColumns.values().length == 6;
         String[] cols = new String[TranslatedCSVColumns.values().length];
         cols[TranslatedCSVColumns.MODULE.getIndex()] = module;
         cols[TranslatedCSVColumns.PACKAGE.getIndex()] = pack;
 
-        for (Map.Entry<String,PrimaryRBInfo> entry: keys.entrySet()) {
+        for (Map.Entry<String, PrimaryRBInfo> entry : keys.entrySet()) {
             String key = entry.getKey();
             PrimaryRBInfo primaryInfo = entry.getValue();
 
             cols[TranslatedCSVColumns.KEY.getIndex()] = key;
             cols[TranslatedCSVColumns.PRIMARY.getIndex()] = primaryInfo.getValue().replace("\"", "\"\"");
+            cols[TranslatedCSVColumns.SECONDARY.getIndex()] = "";
+            if (polish != null) {
+                TranslatedRBInfo translatedInfo = polish.keys.get(key);
+                if (translatedInfo != null) {
+                    String str = translatedInfo.getValue();
+                    str = I18NUtils.getJapString(str);
+                    cols[TranslatedCSVColumns.SECONDARY.getIndex()] = str;
+                }
+            }
             cols[TranslatedCSVColumns.TRANSLATED.getIndex()] = "";
             if (translated != null) {
                 TranslatedRBInfo translatedInfo = translated.keys.get(key);
