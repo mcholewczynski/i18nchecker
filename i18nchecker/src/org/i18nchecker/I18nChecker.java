@@ -1,22 +1,20 @@
 /**
-*   Copyright 2010-2011 Petr Hamernik
-*
-*   Licensed under the Apache License, Version 2.0 (the "License");
-*   you may not use this file except in compliance with the License.
-*   You may obtain a copy of the License at
-*
-*       http://www.apache.org/licenses/LICENSE-2.0
-*
-*   Unless required by applicable law or agreed to in writing, software
-*   distributed under the License is distributed on an "AS IS" BASIS,
-*   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*   See the License for the specific language governing permissions and
-*   limitations under the License.
-*/
-
+ * Copyright 2010-2011 Petr Hamernik
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.i18nchecker;
 
-import com.sun.org.apache.xerces.internal.util.XMLCatalogResolver;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -50,17 +48,17 @@ import org.xml.sax.EntityResolver;
  * <li>Mode 1 - Print errors: prints all errors in I18N (no other extra property is required)</li>
  * <li>Mode 2 - Export to CSV for translation (language and exportToFile property must be set)</li>
  * <li>Mode 3 - Apply translated CSV into translated resource bundle files
- *     (language and importFromFile property must be set)</li>
+ * (language and importFromFile property must be set)</li>
  * <li>Mode 4 - Run as unit test verifying that there are no regressions in I18N.
- *     runAsTest method should be called and it takes all required parameters.</li>
+ * runAsTest method should be called and it takes all required parameters.</li>
  * </ul>
  *
  * @author Petr Hamernik
  */
 public final class I18nChecker extends Task {
 
-    private static final MessageFormat TEST_ERROR =
-            new MessageFormat("Module {0}: Found {1} errors in I18N (expected <= {2}).\n");
+    private static final MessageFormat TEST_ERROR
+            = new MessageFormat("Module {0}: Found {1} errors in I18N (expected <= {2}).\n");
 
     private File repoRoot;
     private List<String> topDirsToScan;
@@ -109,14 +107,6 @@ public final class I18nChecker extends Task {
         this.moduleFilter = moduleFilter;
     }
 
-    public void setXmlCatalog(File xmlCatalog) {
-        String [] catalogs = { xmlCatalog.toURI().toString() };
-        XMLCatalogResolver xmlR = new XMLCatalogResolver();
-        xmlR.setPreferPublic(true);
-        xmlR.setCatalogList(catalogs);
-        resolver = xmlR;
-    }
-
     @Override
     public void execute() throws BuildException {
         try {
@@ -154,16 +144,16 @@ public final class I18nChecker extends Task {
     private void printErrors(List<? extends ModuleScanner> scanners) throws IOException {
         StringBuilder summary = new StringBuilder();
         int total = 0;
-        for (ModuleScanner moduleScanner: scanners) {
+        for (ModuleScanner moduleScanner : scanners) {
             moduleScanner.printResults(true);
             int problemsCount = moduleScanner.getProblemsCount();
             total += problemsCount;
             if (problemsCount > 0) {
                 summary
-                    .append(relativePath(repoRoot, moduleScanner.getRoot()))
-                    .append(" = ")
-                    .append(moduleScanner.getProblemsCount())
-                    .append("\n");
+                        .append(relativePath(repoRoot, moduleScanner.getRoot()))
+                        .append(" = ")
+                        .append(moduleScanner.getProblemsCount())
+                        .append("\n");
             }
         }
         log("\n\nSummary:\n");
@@ -204,16 +194,15 @@ public final class I18nChecker extends Task {
         }
     }
 
-
     /**
      * Mode 4 - This method is used from unit test I18NTest using introspection.
      *
      * @param repoRoot The root of the source code repository.
      * @param topDirs A list of folder to scan for NetBeans or Maven projects.
-     *   The list should contain relative paths from the {@code repoRoot} folder.
+     * The list should contain relative paths from the {@code repoRoot} folder.
      * @param unfinishedModules The map with relative paths and error counts from a previous run of this method.
-     *   The map serves as a baseline for the error checks. The keys are the relative paths
-     *   from either {@code modulePaths} and {@code sourceRootPaths} lists.
+     * The map serves as a baseline for the error checks. The keys are the relative paths
+     * from either {@code modulePaths} and {@code sourceRootPaths} lists.
      *
      * @return A list of errors.
      * @throws IOException If an I/O error occurs while scanning.
@@ -226,16 +215,16 @@ public final class I18nChecker extends Task {
         collectScanners(scanners, repoRoot, Arrays.asList(topDirs.split(",")), null, resolver);
 
         StringBuilder result = new StringBuilder();
-        for (ModuleScanner moduleScanner: scanners) {
+        for (ModuleScanner moduleScanner : scanners) {
             moduleScanner.scan();
             String relativePath = relativePath(repoRoot, moduleScanner.getRoot());
             int expectedMaximumProblems = unfinishedModules.containsKey(relativePath)
-                    ? unfinishedModules.get(relativePath)
-                    : 0;
+                                          ? unfinishedModules.get(relativePath)
+                                          : 0;
             int actualProblems = moduleScanner.getProblemsCount();
             if (actualProblems > expectedMaximumProblems) {
                 moduleScanner.printResults(true);
-                result.append(TEST_ERROR.format(new Object[] {
+                result.append(TEST_ERROR.format(new Object[]{
                     relativePath, actualProblems, expectedMaximumProblems
                 }));
             }
@@ -250,8 +239,7 @@ public final class I18nChecker extends Task {
         for (String topDirToScan : topDirsToScan) {
             File topDir = new File(repoRoot, topDirToScan);
             if (!topDir.exists() || !topDir.isDirectory()
-                || (moduleFilter != null && moduleFilter.length() > 0 && !topDirToScan.contains(moduleFilter))
-            ) {
+                || (moduleFilter != null && moduleFilter.length() > 0 && !topDirToScan.contains(moduleFilter))) {
                 return;
             }
 

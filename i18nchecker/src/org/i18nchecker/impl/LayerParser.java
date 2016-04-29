@@ -16,6 +16,7 @@
 package org.i18nchecker.impl;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,16 +26,20 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.Attr;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.EntityResolver;
+import org.xml.sax.SAXException;
 
 /**
  * Simple parser to find localizable entries in NetBeans XML layer file.
@@ -79,10 +84,7 @@ public class LayerParser {
             if ((this.bundlePath == null) ? (other.bundlePath != null) : !this.bundlePath.equals(other.bundlePath)) {
                 return false;
             }
-            if ((this.bundleKey == null) ? (other.bundleKey != null) : !this.bundleKey.equals(other.bundleKey)) {
-                return false;
-            }
-            return true;
+            return !((this.bundleKey == null) ? (other.bundleKey != null) : !this.bundleKey.equals(other.bundleKey));
         }
 
         @Override
@@ -99,7 +101,7 @@ public class LayerParser {
         }
     }
 
-    private List<LayerData> data = new ArrayList();
+    private final List<LayerData> data = new ArrayList();
 
     public LayerParser() {
     }
@@ -144,8 +146,16 @@ public class LayerParser {
                         bundleFile, bundleKey, "bundle key referenced in " + sb.toString() + " not found"));
             }
             return data;
-        } catch (Exception ex) {
-            Logger.getLogger(LayerParser.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ParserConfigurationException ex) {
+            Logger.getLogger(LayerParser.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+        } catch (SAXException ex) {
+            Logger.getLogger(LayerParser.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+        } catch (IOException ex) {
+            Logger.getLogger(LayerParser.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+        } catch (XPathExpressionException ex) {
+            Logger.getLogger(LayerParser.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+        } catch (DOMException ex) {
+            Logger.getLogger(LayerParser.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
         }
         return Collections.emptyList();
     }

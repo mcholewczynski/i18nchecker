@@ -1,11 +1,11 @@
 /**
  * Copyright 2010-2011 Petr Hamernik
- * 
-* Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
- * 
-* http://www.apache.org/licenses/LICENSE-2.0
- * 
-* Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 package org.i18nchecker.impl;
@@ -29,17 +29,18 @@ import org.antlr.runtime.Token;
  * @author Petr Hamernik
  */
 class JavaSourceModel {
+
     private static final boolean skipEmptyAndSingleCharStrings = true;
 
     private static final String NOI18N = "NOI18N";
     private static final String NB_BUNDLE = "NbBundle";
 
     private static final String FONT = "Font";
-    private static final List<String> KNONW_FONTS = Arrays.asList(new String [] {
-                "Tahoma", "Courier", "Arial", "Dialog"
-            });
+    private static final List<String> KNONW_FONTS = Arrays.asList(new String[]{
+        "Tahoma", "Courier", "Arial", "Dialog"
+    });
 
-    private String fileName;
+    private final String fileName;
     private List<Info> strings;
 
     public JavaSourceModel(String fileName) {
@@ -96,8 +97,8 @@ class JavaSourceModel {
                     boolean isCloseToNbBundle = (line == lineOfLastNbBundleOccurence);
                     strings.add(new Info(str, line, isCloseToNbBundle));
                 } else if (token.getType() == JavaLexer.LINE_COMMENT) {
-                    if (token.getText().indexOf(NOI18N) >= 0) {
-                        for (Info info: strings) {
+                    if (token.getText().contains(NOI18N)) {
+                        for (Info info : strings) {
                             if (info.getLine() == line) {
                                 info.setNoI18N();
                             }
@@ -133,7 +134,7 @@ class JavaSourceModel {
     /** Do verification of strings against the provided resource bundle */
     void verify(PrimaryResourceBundleModel bundle) {
         if (bundle != null) {
-            for (Info info: strings) {
+            for (Info info : strings) {
                 if (bundle.markAsUsed(info.getStr())) {
                     info.markFoundInBundle();
                 }
@@ -144,9 +145,9 @@ class JavaSourceModel {
     /** Report results into the provided ScanResults */
     void reportResults(ScanResults results) {
         results.incrementFileCounter(FileType.JAVA);
-        Map<Integer,Integer> stringsPerLine = new HashMap<Integer,Integer>(); // [lineNo -> Count of strings at this line]
-        for (Info info: strings) {
-            int stringCount = stringsPerLine.containsKey(info.getLine()) ? stringsPerLine.get(info.getLine()).intValue() + 1 : 1;
+        Map<Integer, Integer> stringsPerLine = new HashMap<Integer, Integer>(); // [lineNo -> Count of strings at this line]
+        for (Info info : strings) {
+            int stringCount = stringsPerLine.containsKey(info.getLine()) ? stringsPerLine.get(info.getLine()) + 1 : 1;
             stringsPerLine.put(info.getLine(), stringCount);
             if (!info.isFoundInBundle() && !info.isNoI18N()) {
                 if (info.isCloseToNbBundle()) {
@@ -161,8 +162,8 @@ class JavaSourceModel {
         // Ignore java sources which are forms.
         File form = new File(fileName.substring(0, fileName.length() - 5) + ".form");
         if (!form.exists()) {
-            for (Info info: strings) {
-                if (info.isFoundInBundle() && info.isNoI18N() && (stringsPerLine.get(info.getLine()).intValue() == 1)) {
+            for (Info info : strings) {
+                if (info.isFoundInBundle() && info.isNoI18N() && (stringsPerLine.get(info.getLine()) == 1)) {
                     results.add(ScanResults.Type.NOT_NECESSARY_TO_USE_NOI18N, fileName, info.getLine(), info.getStr());
                 }
             }
@@ -171,12 +172,13 @@ class JavaSourceModel {
 
     /** Info about one string in java source */
     private static class Info {
+
         /** The string found in source */
-        private String str;
+        private final String str;
         /** Line number of this string */
-        private int line;
+        private final int line;
         /** Is this string in the same line as identifier "NbBundle" in source? */
-        private boolean closeToNbBundle;
+        private final boolean closeToNbBundle;
         /** Is there // NOI18N line comment in the end of this line? */
         private boolean noi18n;
         /** Was this string found in package bundle? */

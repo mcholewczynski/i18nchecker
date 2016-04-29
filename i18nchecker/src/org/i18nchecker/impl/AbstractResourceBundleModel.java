@@ -1,19 +1,18 @@
 /**
-*   Copyright 2010-2011 Petr Hamernik
-*
-*   Licensed under the Apache License, Version 2.0 (the "License");
-*   you may not use this file except in compliance with the License.
-*   You may obtain a copy of the License at
-*
-*       http://www.apache.org/licenses/LICENSE-2.0
-*
-*   Unless required by applicable law or agreed to in writing, software
-*   distributed under the License is distributed on an "AS IS" BASIS,
-*   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*   See the License for the specific language governing permissions and
-*   limitations under the License.
-*/
-
+ * Copyright 2010-2011 Petr Hamernik
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.i18nchecker.impl;
 
 import java.io.BufferedReader;
@@ -31,9 +30,10 @@ import java.util.TreeMap;
  * @author Petr Hamernik
  */
 abstract class AbstractResourceBundleModel<T extends AbstractRBInfo> {
+
     private static final String YESI18N = "YESI18N";
 
-    private String fileName;
+    private final String fileName;
     protected Map<String, T> keys;
 
     public AbstractResourceBundleModel(String fileName) {
@@ -87,7 +87,7 @@ abstract class AbstractResourceBundleModel<T extends AbstractRBInfo> {
                     if (indexOfEqual <= 0) {
                         String msg = MessageFormat.format(
                                 "{0}:{1}: WARNING: incorrect key: {2}",
-                                new Object[] { fileName, lineCount, line } );
+                                new Object[]{fileName, lineCount, line});
                         System.out.println(msg);
                     } else {
                         String key = line.substring(0, indexOfEqual).trim();

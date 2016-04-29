@@ -1,19 +1,18 @@
 /**
-*   Copyright 2010-2011 Petr Hamernik
-*
-*   Licensed under the Apache License, Version 2.0 (the "License");
-*   you may not use this file except in compliance with the License.
-*   You may obtain a copy of the License at
-*
-*       http://www.apache.org/licenses/LICENSE-2.0
-*
-*   Unless required by applicable law or agreed to in writing, software
-*   distributed under the License is distributed on an "AS IS" BASIS,
-*   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*   See the License for the specific language governing permissions and
-*   limitations under the License.
-*/
-
+ * Copyright 2010-2011 Petr Hamernik
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.i18nchecker.impl;
 
 import java.text.MessageFormat;
@@ -28,10 +27,12 @@ import java.util.Map;
  * @author Petr Hamernik
  */
 class ScanResults {
+
     private static final MessageFormat MSG = new MessageFormat("{0}:{1}: {2}");
     private static final MessageFormat SUMMARY = new MessageFormat("Scanned {0} Java sources, {1} primary and {2} translated resource bundles. Found {3} potential problems.");
 
     public enum Type {
+
         MISSING_KEY_IN_BUNDLE("Very likely missing key in resource bundle"),
         MISSING_NOI18N_OR_KEY_IN_BUNDLE("Probably missing key in resource bundle or string should be marked with // NOI18N"),
         MAYBE_UNUSED_KEY_IN_BUNDLE("Probably unused resource bundle"),
@@ -39,7 +40,7 @@ class ScanResults {
         MODULE_LAYER_DEFINITION("Module's XML layer definition is missing in resource bundle"),
         NOT_NECESSARY_TO_USE_NOI18N("It is redundant to use NOI18N when String actually is in resource bundle");
 
-        private String description;
+        private final String description;
 
         private Type(String description) {
             this.description = description;
@@ -50,8 +51,8 @@ class ScanResults {
         }
     }
 
-    private String name;
-    private Map<Type,List<String>> results = new EnumMap<Type,List<String>>(Type.class);
+    private final String name;
+    private final Map<Type, List<String>> results = new EnumMap<Type, List<String>>(Type.class);
     private int sourceCount;
     private int bundleCount;
     private int translatedBundleCount;
@@ -79,7 +80,7 @@ class ScanResults {
             list = new ArrayList<String>();
             results.put(type, list);
         }
-        list.add(MSG.format(new Object[] { fileName, Integer.toString(line), message }));
+        list.add(MSG.format(new Object[]{fileName, Integer.toString(line), message}));
     }
 
     /** Just a primitive counter of Java/bundle files to be printed in summary
@@ -96,7 +97,7 @@ class ScanResults {
 
     public int getProblemsCount() {
         int count = 0;
-        for (Type type: Type.values()) {
+        for (Type type : Type.values()) {
             List<String> list = results.get(type);
             if (list != null) {
                 count += list.size();
@@ -110,14 +111,14 @@ class ScanResults {
         System.out.println();
         System.out.println("Module: " + name);
         System.out.println(
-                SUMMARY.format(new Object[] { sourceCount, bundleCount,
-                translatedBundleCount, getProblemsCount() }));
+                SUMMARY.format(new Object[]{sourceCount, bundleCount,
+                                            translatedBundleCount, getProblemsCount()}));
         if (details) {
-            for (Type type: Type.values()) {
+            for (Type type : Type.values()) {
                 List<String> list = results.get(type);
                 if (list != null) {
                     System.out.println(type.getDescription());
-                    for (String val: list) {
+                    for (String val : list) {
                         System.out.println(val);
                     }
                 }
