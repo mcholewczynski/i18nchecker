@@ -47,7 +47,7 @@ class PackageScanner {
         this.packageDir = packageDir;
         this.sources = new TreeMap<String, JavaSourceModel>();
         this.translatedBundles = new HashSet<TranslatedResourceBundleModel>();
-        this.simpleName = packageDir.getCanonicalPath().substring(moduleDirName.length()).replace(File.separator, "/");
+        this.simpleName = packageDir.getCanonicalPath().substring(moduleDirName.length() - 1).replace(File.separator, "/");
     }
 
     /**
