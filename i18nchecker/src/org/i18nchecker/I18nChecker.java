@@ -255,6 +255,11 @@ public final class I18nChecker extends Task {
                     scanners.add(new ModuleScanner(f, true, resolver));
                 } else if (isMavenProject(new File(f, "pom.xml"))) {
                     scanners.add(new ModuleScanner(new File(f, "/src/main/java"), false, resolver));
+                } else if (isGradleProject(new File(f, "build.gradle"))) {
+                    scanners.add(new ModuleScanner(new File(f, "/src/main/resources"), false, resolver));
+                    String[] dirsArr = ".".split(",");
+                    List<String> subModulesDirsToScan = Arrays.asList(dirsArr);
+                    collectScanners(scanners, f, subModulesDirsToScan, moduleFilter, resolver);
                 } else if (new File(f, "src").exists()) {
                     scanners.add(new ModuleScanner(new File(f, "src"), false, resolver));
                 } else {
@@ -305,5 +310,9 @@ public final class I18nChecker extends Task {
 
     private static boolean isMavenProject(File pom) throws IOException {
         return pom.exists() && pom.isFile();
+    }
+
+    private static boolean isGradleProject(File buildGradle) throws IOException {
+        return buildGradle.exists() && buildGradle.isFile();
     }
 }
